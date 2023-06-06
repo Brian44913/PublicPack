@@ -1,4 +1,4 @@
-module PublicPackageCode
+module github.com/Brian44913/PublicPackage/other
 
 go 1.18
 

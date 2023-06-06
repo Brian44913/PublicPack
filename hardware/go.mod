@@ -1,4 +1,4 @@
-module PublicPackageHardware
+module github.com/Brian44913/PublicPackage/hardware
 
 go 1.18
 
