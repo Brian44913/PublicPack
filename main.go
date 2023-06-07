@@ -12,6 +12,15 @@ func main() {
 	OS,_ := PublicPackageHardware.GetOS()
 	fmt.Println("OS:", OS)
 	
+	GPUName,_ := PublicPackageHardware.GetGPUName()
+	fmt.Println("GPUName:", GPUName)
+	
+	CPUName := PublicPackageHardware.GetCPUName()
+	fmt.Println("CPUName:", CPUName)
+	
+	BoardName,_ := PublicPackageHardware.GetMotherboardName()
+	fmt.Println("BoardName:", BoardName)
+	
 	Speed := PublicPackageHardware.GetSpeed()
 	fmt.Println("Speed:", Speed)
 	
@@ -19,6 +28,8 @@ func main() {
 	fmt.Println("Public_IP:", Public_IP)
 	Intranet_IP := PublicPackageHardware.GetLocalIP("intranet")
 	fmt.Println("Intranet_IP:", Intranet_IP)
+	Gateway,_ := PublicPackageHardware.GetDefaultGateway()
+	fmt.Println("Gateway:", Gateway)
 	
 	// PublicPackageCode
 	Base64UrlEncode := PublicPackageCode.Base64UrlEncode("https://github.com/Brian44913/PublicPackage")

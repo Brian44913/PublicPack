@@ -5,9 +5,11 @@ import (
     "net"
 	"os/exec"
 	"strings"
+	"regexp"
 	"github.com/safchain/ethtool"
 	"math"
 	"time"
+	"io/ioutil"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/host"
@@ -97,7 +99,24 @@ func BootTime() string{
 	boottime, _ := host.BootTime()
     return time.Unix(int64(boottime), 0).Format("2006-01-02 15:04:05")
 }
-func CpuName() string{
+func GetGPUName() (string, error) {
+	cmd := exec.Command("/usr/bin/nvidia-smi", "-L")
+	output, err := cmd.Output()
+
+	if err != nil {
+		return "", err
+	}
+
+	r := regexp.MustCompile(`(?m)^GPU \d+: (.*?)\s+\(`) // 修改了这里
+	matches := r.FindAllStringSubmatch(string(output), -1)
+	gpuNames := []string{}
+	for _, match := range matches {
+		gpuNames = append(gpuNames, match[1])
+	}
+
+	return strings.Join(gpuNames, ","), nil
+}
+func GetCPUName() string{
 	var modelname string
 	infos, _ := cpu.Info()
 	for _, sub_cpu := range infos {
@@ -107,6 +126,57 @@ func CpuName() string{
 		}
 	}
 	return ""
+}
+func GetMotherboardName() (string, error) {
+	data, err := ioutil.ReadFile("/sys/class/dmi/id/board_name")
+	if err != nil {
+		return "", err
+	}
+
+	// 删除尾部的换行符
+	name := strings.TrimSpace(string(data))
+	return name, nil
+}
+func GetDefaultGateway() (string, error) {
+	cmd := exec.Command("bash", "-c", "ip route | grep default | awk '{print $3}' | head -n 1")
+	output, err := cmd.Output()
+	if err != nil {
+		return "", err
+	}
+
+	// 删除尾部的换行符
+	gateway := strings.TrimSpace(string(output))
+	return gateway, nil
+}
+func CheckRoute() (int, error) {
+	cmd := exec.Command("ip", "route")
+	output, err := cmd.Output()
+
+	if err != nil {
+		return 0, err
+	}
+
+	if strings.Contains(string(output), "8.0.0.0") {
+		return 1, nil
+	}
+
+	return 0, nil
+}
+func CheckUFW() (int, error) {
+	cmd := exec.Command("ufw", "status")
+	output, err := cmd.Output()
+
+	if err != nil {
+		return 0, err
+	}
+
+	outputStr := string(output)
+
+	if strings.Contains(outputStr, "Status: active") && strings.Contains(outputStr, "106.14.32.135") {
+		return 1, nil
+	}
+
+	return 0, nil
 }
 func RateDisk(dir string) int {
 	info, _ := disk.Usage(dir)
