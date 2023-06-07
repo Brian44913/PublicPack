@@ -44,37 +44,31 @@ func GetSpeed() int {
 	}
 	return int(cmdGet["speed"])
 }
-func GetLocalIP(network string) (net.IP, error) {
-    ifaces, err := net.Interfaces()
+func GetLocalIP(network string) (ip string) {
+    addrs, err := net.InterfaceAddrs()
     if err != nil {
-        return nil, err
+        return ""
     }
-    for _, iface := range ifaces {
-        if iface.Flags&net.FlagUp == 0 {
-            continue // interface down
+    for _, addr := range addrs {
+        ipAddr, ok := addr.(*net.IPNet)
+		//fmt.Println(ipAddr)
+        if !ok {
+            continue
         }
-        if iface.Flags&net.FlagLoopback != 0 {
-            continue // loopback interface
+        if ipAddr.IP.IsLoopback() {
+            continue
         }
-        addrs, err := iface.Addrs()
-        if err != nil {
-            return nil, err
+        if !ipAddr.IP.IsGlobalUnicast() {
+            continue
         }
-        for _, addr := range addrs {
-            ip := getIpFromAddr(addr)
-            if ip == nil {
-                continue
-            }
-			if(network == "public" && strings.Index(ip.String(), "192.168")== -1){
-				return ip, nil
-			}
-			if(network == "intranet" && strings.Index(ip.String(), "192.168")!= -1){
-				return ip, nil
-			}
-            //return ip, nil
-        }
+		if(network == "public" && strings.Index(ipAddr.IP.String(), "192.168")== -1){
+			return ipAddr.IP.String()
+		}
+		if(network == "intranet" && strings.Index(ipAddr.IP.String(), "192.168")!= -1){
+			return ipAddr.IP.String()
+		}
     }
-    return nil, fmt.Errorf("connected to the network?")
+    return ""
 }
 func getIpFromAddr(addr net.Addr) net.IP {
     var ip net.IP

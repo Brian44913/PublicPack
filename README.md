@@ -18,15 +18,9 @@ func main() {
 	Speed := PublicPackageHardware.GetSpeed()
 	fmt.Println("Speed:", Speed)
 	
-	Public_IP, err := PublicPackageHardware.GetLocalIP(`public`)
-	if err != nil {
-		fmt.Println(err)
-	}
+	Public_IP := PublicPackageHardware.GetLocalIP(`public`)
 	fmt.Println("Public_IP:", Public_IP)
-	Intranet_IP, err := PublicPackageHardware.GetLocalIP("intranet")
-	if err != nil {
-		fmt.Println(err)
-	}
+	Intranet_IP := PublicPackageHardware.GetLocalIP("intranet")
 	fmt.Println("Intranet_IP:", Intranet_IP)
 	
 	// PublicPackageCode
