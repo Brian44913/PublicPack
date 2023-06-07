@@ -97,7 +97,7 @@ func BootTime() string{
 	boottime, _ := host.BootTime()
     return time.Unix(int64(boottime), 0).Format("2006-01-02 15:04:05")
 }
-func CpuNname() string{
+func CpuName() string{
 	var modelname string
 	infos, _ := cpu.Info()
 	for _, sub_cpu := range infos {
