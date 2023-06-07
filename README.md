@@ -5,8 +5,8 @@ package main
  
 import (
 	"fmt"
-	"github.com/Brian44913/PublicPackage/code"
 	"github.com/Brian44913/PublicPackage/hardware"
+	"github.com/Brian44913/PublicPackage/code"
 	"github.com/Brian44913/PublicPackage/other"
 )
 
@@ -20,13 +20,13 @@ func main() {
 	
 	Public_IP, err := PublicPackageHardware.GetLocalIP(`public`)
 	if err != nil {
-        fmt.Println(err)
-    }
+		fmt.Println(err)
+	}
 	fmt.Println("Public_IP:", Public_IP)
 	Intranet_IP, err := PublicPackageHardware.GetLocalIP("intranet")
 	if err != nil {
-        fmt.Println(err)
-    }
+		fmt.Println(err)
+	}
 	fmt.Println("Intranet_IP:", Intranet_IP)
 	
 	// PublicPackageCode
@@ -38,6 +38,5 @@ func main() {
 	// PublicPackageOther
 	hostname, _ := PublicPackageOther.ReadAll("/etc/hostname")
 	fmt.Println("hostname:", string(hostname))
-	
 }
 ```
