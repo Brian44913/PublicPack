@@ -4,7 +4,10 @@ import (
 	"regexp"
     "fmt"
 	"os"
+	"strings"
 	"io/ioutil"
+	"crypto/md5"
+	"os/exec"
 )
 
 func DomainHosts(domain string,IP string) {
@@ -42,4 +45,22 @@ func ReplaceStringByRegex(str, rule, replace string) (string, error) {
         return "", fmt.Errorf("正则MustCompile错误:" + err.Error())
     }
     return reg.ReplaceAllString(str, replace), nil
+}
+func GetBinV(file string, cmds string) (string, error) {
+	bin_stat, _ := os.Stat(file)
+	bin_md5 := fmt.Sprintf("%x", md5.Sum([]byte(file+bin_stat.ModTime().Format("2006-01-02 15:04:05"))))
+	bin_v, err := ReadAll("/tmp/"+bin_md5)
+	if err != nil {
+		cmd := exec.Command("bash", "-c", file+" "+cmds)
+		output, err := cmd.Output()
+		if err != nil {
+			return "", err
+		}
+
+		// 删除尾部的换行符
+		bin_v2 := strings.TrimSpace(string(output))
+		ioutil.WriteFile("/tmp/"+bin_md5, []byte(bin_v2), 0666)
+		return bin_v2, nil
+	}
+	return string(bin_v), nil
 }

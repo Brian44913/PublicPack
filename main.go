@@ -40,4 +40,7 @@ func main() {
 	// PublicPackageOther
 	hostname, _ := PublicPackageOther.ReadAll("/etc/hostname")
 	fmt.Println("hostname:", string(hostname))
+	
+	lotus_v, _ := PublicPackageOther.GetBinV("/root/sh/.bash/lotus","-v")
+	fmt.Println("lotus_v:", lotus_v)
 }
