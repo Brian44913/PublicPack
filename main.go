@@ -2,9 +2,9 @@ package main
  
 import (
 	"fmt"
-	"PublicPackageHardware"
-	"PublicPackageCode"
-	"PublicPackageOther"
+	"github.com/Brian44913/PublicPackage/hardware"
+	"github.com/Brian44913/PublicPackage/code"
+	"github.com/Brian44913/PublicPackage/other"
 )
 
 func main() {
