@@ -6,6 +6,11 @@ import (
 	"os/exec"
 	"strings"
 	"github.com/safchain/ethtool"
+	"math"
+	"time"
+	"github.com/shirou/gopsutil/cpu"
+	"github.com/shirou/gopsutil/disk"
+	"github.com/shirou/gopsutil/host"
 )
 
 func GetOS() (string, error){
@@ -87,4 +92,23 @@ func getIpFromAddr(addr net.Addr) net.IP {
     }
 
     return ip
+}
+func BootTime() string{
+	boottime, _ := host.BootTime()
+    return time.Unix(int64(boottime), 0).Format("2006-01-02 15:04:05")
+}
+func CpuNname() string{
+	var modelname string
+	infos, _ := cpu.Info()
+	for _, sub_cpu := range infos {
+		modelname = sub_cpu.ModelName
+		if modelname!="" {
+			return modelname
+		}
+	}
+	return ""
+}
+func RateDisk(dir string) int {
+	info, _ := disk.Usage(dir)
+	return int(math.Floor(float64(info.UsedPercent) + 0.5))
 }
