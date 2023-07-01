@@ -4,9 +4,13 @@ import (
 	"regexp"
     "fmt"
 	"os"
+	"time"
 	"strings"
 	"io/ioutil"
+	"encoding/hex"
+	"io"
 	"crypto/md5"
+	"path/filepath"
 	"os/exec"
 )
 
@@ -45,6 +49,76 @@ func ReplaceStringByRegex(str, rule, replace string) (string, error) {
         return "", fmt.Errorf("正则MustCompile错误:" + err.Error())
     }
     return reg.ReplaceAllString(str, replace), nil
+}
+func GetStringFromFile(path string) string {
+	//读取文件全部内容
+	b, err := ioutil.ReadFile(path)
+	if err != nil {
+		return ""
+	}
+	return strings.Replace(string(b), "\n", "", -1)
+}
+func generateMD5(paths []string) (string, error) {
+	hash := md5.New()
+	for _, path := range paths {
+		_, err := io.WriteString(hash, path)
+		if err != nil {
+			return "", err
+		}
+	}
+	return hex.EncodeToString(hash.Sum(nil)), nil
+}
+func GetDirMD5(dir string) (string, error) {
+	var paths []string
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if !info.IsDir() {
+			modTime := info.ModTime().Format(time.RFC3339)
+			paths = append(paths, modTime)
+		}
+		return nil
+	})
+	if err != nil {
+		fmt.Println("Error:", err)
+		return "", err
+	}
+	md5Value, err := generateMD5(paths)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return "", err
+	}
+	return md5Value, nil
+}
+func IsCacheEx(dir string) bool {
+	MD5file  := "/tmp/cacheMD5"
+	MD5Info, err := os.Stat(MD5file)
+	if err != nil {
+		MD5,err  := GetDirMD5(dir)
+		if err != nil {
+			fmt.Println("Error:", err)
+		}
+		create, _ := os.Create(MD5file)
+		_, err = create.Write([]byte(MD5))
+	}else{
+		modTime := MD5Info.ModTime()
+		elapsed := time.Since(modTime)
+		if elapsed > 1*time.Minute {
+			MD5cache := GetStringFromFile(MD5file)
+			MD5,err  := GetDirMD5(dir)
+			if err != nil {
+				fmt.Println("Error:", err)
+			}
+			if MD5cache==MD5 {
+				_ = os.Remove(MD5file)
+				return true
+			}
+		}else{
+			fmt.Println(elapsed)
+		}
+	}
+	return false // 未超时
 }
 func GetBinV(file string, cmds string) (string, error) {
 	bin_stat, _ := os.Stat(file)

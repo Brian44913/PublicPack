@@ -13,6 +13,7 @@ import (
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/host"
+	"github.com/shirou/gopsutil/v3/mem"
 )
 
 func GetOS() (string, error){
@@ -186,4 +187,12 @@ func CheckUFW() (int, error) {
 func RateDisk(dir string) int {
 	info, _ := disk.Usage(dir)
 	return int(math.Floor(float64(info.UsedPercent) + 0.5))
+}
+func GetUsedMemory() (int, error) {
+	vmStat, err := mem.VirtualMemory()
+	if err != nil {
+		return 0, err
+	}
+	totalUsedGB := int(vmStat.Used) / 1024 / 1024 / 1024
+	return totalUsedGB, nil
 }

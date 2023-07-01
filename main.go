@@ -24,6 +24,9 @@ func main() {
 	Speed := PublicPackHardware.GetSpeed()
 	fmt.Println("Speed:", Speed)
 	
+	totalUsedGB, _ := PublicPackHardware.GetUsedMemory()
+	fmt.Println("totalUsedGB:", totalUsedGB)
+	
 	Public_IP := PublicPackHardware.GetLocalIP(`public`)
 	fmt.Println("Public_IP:", Public_IP)
 	Intranet_IP := PublicPackHardware.GetLocalIP("intranet")
