@@ -2,45 +2,45 @@ package main
  
 import (
 	"fmt"
-	"github.com/Brian44913/PublicPackage/hardware"
-	"github.com/Brian44913/PublicPackage/code"
-	"github.com/Brian44913/PublicPackage/other"
+	"github.com/Brian44913/PublicPack/hardware"
+	"github.com/Brian44913/PublicPack/code"
+	"github.com/Brian44913/PublicPack/other"
 )
 
 func main() {
-	// PublicPackageHardware
-	OS,_ := PublicPackageHardware.GetOS()
+	// PublicPackHardware
+	OS,_ := PublicPackHardware.GetOS()
 	fmt.Println("OS:", OS)
 	
-	GPUName,_ := PublicPackageHardware.GetGPUName()
+	GPUName,_ := PublicPackHardware.GetGPUName()
 	fmt.Println("GPUName:", GPUName)
 	
-	CPUName := PublicPackageHardware.GetCPUName()
+	CPUName := PublicPackHardware.GetCPUName()
 	fmt.Println("CPUName:", CPUName)
 	
-	BoardName,_ := PublicPackageHardware.GetMotherboardName()
+	BoardName,_ := PublicPackHardware.GetMotherboardName()
 	fmt.Println("BoardName:", BoardName)
 	
-	Speed := PublicPackageHardware.GetSpeed()
+	Speed := PublicPackHardware.GetSpeed()
 	fmt.Println("Speed:", Speed)
 	
-	Public_IP := PublicPackageHardware.GetLocalIP(`public`)
+	Public_IP := PublicPackHardware.GetLocalIP(`public`)
 	fmt.Println("Public_IP:", Public_IP)
-	Intranet_IP := PublicPackageHardware.GetLocalIP("intranet")
+	Intranet_IP := PublicPackHardware.GetLocalIP("intranet")
 	fmt.Println("Intranet_IP:", Intranet_IP)
-	Gateway,_ := PublicPackageHardware.GetDefaultGateway()
+	Gateway,_ := PublicPackHardware.GetDefaultGateway()
 	fmt.Println("Gateway:", Gateway)
 	
-	// PublicPackageCode
-	Base64UrlEncode := PublicPackageCode.Base64UrlEncode("https://github.com/Brian44913/PublicPackage")
+	// PublicPackCode
+	Base64UrlEncode := PublicPackCode.Base64UrlEncode("https://github.com/Brian44913/PublicPack")
 	fmt.Println("Base64UrlEncode:", Base64UrlEncode)
-	Base64UrlDecode,_ := PublicPackageCode.Base64UrlDecode(Base64UrlEncode)
+	Base64UrlDecode,_ := PublicPackCode.Base64UrlDecode(Base64UrlEncode)
 	fmt.Println("Base64UrlDecode:", string(Base64UrlDecode))
 	
-	// PublicPackageOther
-	hostname, _ := PublicPackageOther.ReadAll("/etc/hostname")
+	// PublicPackOther
+	hostname, _ := PublicPackOther.ReadAll("/etc/hostname")
 	fmt.Println("hostname:", string(hostname))
 	
-	lotus_v, _ := PublicPackageOther.GetBinV("/root/sh/.bash/lotus","-v")
+	lotus_v, _ := PublicPackOther.GetBinV("/root/sh/.bash/lotus","-v")
 	fmt.Println("lotus_v:", lotus_v)
 }

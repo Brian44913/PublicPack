@@ -2,15 +2,14 @@ module main
 
 go 1.18
 
-require github.com/Brian44913/PublicPackage/hardware v0.0.0
+require github.com/Brian44913/PublicPack/hardware v0.0.0
+replace github.com/Brian44913/PublicPack/hardware => ./hardware
 
-replace github.com/Brian44913/PublicPackage/hardware => ./hardware
+require github.com/Brian44913/PublicPack/code v0.0.0
+replace github.com/Brian44913/PublicPack/code => ./code
 
-require github.com/Brian44913/PublicPackage/code v0.0.0
-
-replace github.com/Brian44913/PublicPackage/code => ./code
-
-require github.com/Brian44913/PublicPackage/other v0.0.0
+require github.com/Brian44913/PublicPack/other v0.0.0
+replace github.com/Brian44913/PublicPack/other => ./other
 
 require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
@@ -23,4 +22,3 @@ require (
 	golang.org/x/sys v0.6.0 // indirect
 )
 
-replace github.com/Brian44913/PublicPackage/other => ./other

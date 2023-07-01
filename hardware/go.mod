@@ -1,4 +1,4 @@
-module github.com/Brian44913/PublicPackage/hardware
+module github.com/Brian44913/PublicPack/hardware
 
 go 1.18
 

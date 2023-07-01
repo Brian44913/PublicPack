@@ -1,4 +1,4 @@
-package PublicPackageHardware
+package PublicPackHardware
 
 import (
     "fmt"
@@ -128,13 +128,18 @@ func GetCPUName() string{
 	return ""
 }
 func GetMotherboardName() (string, error) {
-	data, err := ioutil.ReadFile("/sys/class/dmi/id/board_name")
+	BoardVendor, err := ioutil.ReadFile("/sys/class/dmi/id/board_vendor")
+	if err != nil {
+		return "", err
+	}
+	
+	BoardName, err := ioutil.ReadFile("/sys/class/dmi/id/board_name")
 	if err != nil {
 		return "", err
 	}
 
 	// 删除尾部的换行符
-	name := strings.TrimSpace(string(data))
+	name := strings.TrimSpace(string(BoardVendor)) + " " + strings.TrimSpace(string(BoardName))
 	return name, nil
 }
 func GetDefaultGateway() (string, error) {

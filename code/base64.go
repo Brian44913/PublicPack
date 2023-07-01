@@ -1,4 +1,4 @@
-package PublicPackageCode
+package PublicPackCode
 
 import (
 	"strings"
