@@ -104,7 +104,7 @@ func IsCacheEx(dir string) bool {
 	}else{
 		modTime := MD5Info.ModTime()
 		elapsed := time.Since(modTime)
-		if elapsed > 1*time.Minute {
+		if elapsed > 40*time.Minute {
 			MD5cache := GetStringFromFile(MD5file)
 			MD5,err  := GetDirMD5(dir)
 			if err != nil {
