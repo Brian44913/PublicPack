@@ -2,6 +2,7 @@ package main
  
 import (
 	"fmt"
+	"strings"
 	"github.com/Brian44913/PublicPack/hardware"
 	"github.com/Brian44913/PublicPack/code"
 	"github.com/Brian44913/PublicPack/other"
@@ -33,6 +34,45 @@ func main() {
 	fmt.Println("Intranet_IP:", Intranet_IP)
 	Gateway,_ := PublicPackHardware.GetDefaultGateway()
 	fmt.Println("Gateway:", Gateway)
+	
+	// new 
+	BoardInfo, err := PublicPackHardware.GetMotherboardInfo()
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return
+	}
+
+	fmt.Printf("Motherboard Manufacturer: %s\n", BoardInfo.Manufacturer)
+	fmt.Printf("Motherboard Model: %s\n", BoardInfo.Model)
+	fmt.Printf("Motherboard Serial Number: %s\n", BoardInfo.SerialNumber)
+	
+	CPUInfo, err := PublicPackHardware.GetCPUInfo()
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return
+	}
+
+	fmt.Printf("CPU Model: %s\n", CPUInfo.Model)
+	
+	GPUInfo, err := PublicPackHardware.GetGPUInfo()
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return
+	}
+
+	fmt.Printf("GPU Models: %s\n", strings.Join(GPUInfo.Models, ", "))
+	
+	DiskInfo, err := PublicPackHardware.GetDiskInfo()
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return
+	}
+
+	for i, disk := range DiskInfo {
+		fmt.Printf("Disk #%d Model: %s\n", i+1, disk.Model)
+		fmt.Printf("Disk #%d SN: %s\n", i+1, disk.SN)
+		fmt.Printf("Disk #%d Size: %s\n", i+1, disk.Size)
+	}
 	
 	// PublicPackCode
 	Base64UrlEncode := PublicPackCode.Base64UrlEncode("https://github.com/Brian44913/PublicPack")
