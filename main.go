@@ -74,6 +74,32 @@ func main() {
 		fmt.Printf("Disk #%d Size: %s\n", i+1, disk.Size)
 	}
 	
+	MemoryInfo, err := PublicPackHardware.GetMemoryInfo()
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return
+	}
+
+	for i, memory := range MemoryInfo {
+		fmt.Printf("Memory #%d Model: %s\n", i+1, memory.Model)
+		fmt.Printf("Memory #%d Part Number: %s\n", i+1, memory.PartNumber)
+		fmt.Printf("Memory #%d Speed: %s\n", i+1, memory.Speed)
+		fmt.Printf("Memory #%d SN: %s\n", i+1, memory.SN)
+		fmt.Printf("Memory #%d Size: %s\n", i+1, memory.Size)
+	}
+	
+	PowerSupplyInfo, err := PublicPackHardware.GetPowerSupplyInfo()
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return
+	}
+
+	for i, powerSupply := range PowerSupplyInfo {
+		fmt.Printf("Power Supply #%d Manufacturer: %s\n", i+1, powerSupply.Manufacturer)
+		fmt.Printf("Power Supply #%d Model: %s\n", i+1, powerSupply.Model)
+		fmt.Printf("Power Supply #%d SN: %s\n", i+1, powerSupply.SN)
+	}
+	
 	// PublicPackCode
 	Base64UrlEncode := PublicPackCode.Base64UrlEncode("https://github.com/Brian44913/PublicPack")
 	fmt.Println("Base64UrlEncode:", Base64UrlEncode)
