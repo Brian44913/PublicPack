@@ -1,4 +1,4 @@
-package PublicPackOther
+package other
 
 import (
 	"regexp"

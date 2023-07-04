@@ -1,4 +1,4 @@
-package PublicPackHardware
+package hardware
 
 import (
 	"os/exec"
