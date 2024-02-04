@@ -1,6 +1,7 @@
 package hardware
 
 import (
+	"fmt"
 	"os/exec"
 	"strings"
 )
@@ -14,7 +15,7 @@ type MotherboardInfo struct {
 
 // GetMotherboardInfo 获取主板的信息
 func GetMotherboardInfo() (MotherboardInfo, error) {
-	cmd := exec.Command("dmidecode", "-t", "baseboard")
+	cmd := exec.Command("/usr/sbin/dmidecode", "-t", "baseboard")
 	out, err := cmd.Output()
 	if err != nil {
 		return MotherboardInfo{}, err
@@ -39,4 +40,12 @@ func GetMotherboardInfo() (MotherboardInfo, error) {
 	}
 
 	return info, nil
+}
+func GetMotherboardName() (string, error) {
+	BoardInfo, err := GetMotherboardInfo()
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return "", err
+	}
+	return fmt.Sprintf("%s %s", BoardInfo.Manufacturer, BoardInfo.Model), nil
 }

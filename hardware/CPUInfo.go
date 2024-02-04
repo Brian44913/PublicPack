@@ -1,6 +1,7 @@
 package hardware
 
 import (
+	"fmt"
 	"os/exec"
 	"strings"
 )
@@ -32,4 +33,12 @@ func GetCPUInfo() (CPUInfo, error) {
 	}
 
 	return info, nil
+}
+func GetCPUName() string{
+	CPUInfo, err := GetCPUInfo()
+	if err != nil {
+		fmt.Printf("Error: %v\n", err)
+		return ""
+	}
+	return CPUInfo.Model
 }

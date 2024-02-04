@@ -1,198 +1,121 @@
 package hardware
 
 import (
-    "fmt"
-    "net"
-	"os/exec"
-	"strings"
-	"regexp"
-	"github.com/safchain/ethtool"
-	"math"
-	"time"
-	"io/ioutil"
-	"github.com/shirou/gopsutil/cpu"
-	"github.com/shirou/gopsutil/disk"
-	"github.com/shirou/gopsutil/host"
-	"github.com/shirou/gopsutil/v3/mem"
+	"encoding/json"
+    "io/ioutil"
+    "os"
+    "time"
 )
 
-func GetOS() (string, error){
-	cmd := exec.Command("lsb_release", "-ds")
-	output, err := cmd.Output()
+type JsonHardware struct {
+	BoardInfo				MotherboardInfo			`json:"BoardInfo"`
+	CPUInfo					CPUInfo					`json:"CPUInfo"`
+	GPUInfo					GPUInfo					`json:"GPUInfo"`
+	DiskInfo				[]DiskInfo					`json:"DiskInfo"`
+	MemoryInfo				[]MemoryInfo				`json:"MemoryInfo"`
+	PowerSupplyInfo			[]PowerSupplyInfo			`json:"PowerSupplyInfo"`
+}
+
+func GetHardwareInfo() (JsonHardware, error){
+	BoardInfo, err := GetMotherboardInfo()
 	if err != nil {
-		return "",fmt.Errorf("getOS error", err)
+		return JsonHardware{}, err
 	}
 
-	version := strings.TrimSpace(string(output))
-	return version, nil
-}
-func GetSpeed() int {
-	e, err := ethtool.NewEthtool()
+	DiskInfo, err := GetDiskInfo()
 	if err != nil {
-		panic(err.Error())
-	}
-	defer e.Close()
-	cmdGet, err := e.CmdGetMapped("bond0")
-	if err != nil {
-		ifconfig, _ := exec.Command("/bin/bash", "-c", "/sbin/ifconfig | grep RUNNING | grep -vE 'lo|bond0' | awk '{print $1}' | sed 's/://'").Output()
-		for _, device := range strings.Split(string(ifconfig), "\n") {
-			if len(device) > 1 {
-				stats, err := e.CmdGetMapped(device)
-				if err != nil {
-					panic(err.Error())
-				}
-				if stats["speed"]>0{
-					return int(stats["speed"])
-				}
-				//fmt.Printf("LinkName: %s LinkState: %d\n", device, stats["speed"])
-			}
-
-		}
-		return 0
-	}
-	return int(cmdGet["speed"])
-}
-func GetLocalIP(network string) (ip string) {
-    addrs, err := net.InterfaceAddrs()
-    if err != nil {
-        return ""
-    }
-    for _, addr := range addrs {
-        ipAddr, ok := addr.(*net.IPNet)
-		//fmt.Println(ipAddr)
-        if !ok {
-            continue
-        }
-        if ipAddr.IP.IsLoopback() {
-            continue
-        }
-        if !ipAddr.IP.IsGlobalUnicast() {
-            continue
-        }
-		if(network == "public" && strings.Index(ipAddr.IP.String(), "192.168")== -1){
-			return ipAddr.IP.String()
-		}
-		if(network == "intranet" && strings.Index(ipAddr.IP.String(), "192.168")!= -1){
-			return ipAddr.IP.String()
-		}
-    }
-    return ""
-}
-func getIpFromAddr(addr net.Addr) net.IP {
-    var ip net.IP
-    switch v := addr.(type) {
-    case *net.IPNet:
-        ip = v.IP
-    case *net.IPAddr:
-        ip = v.IP
-    }
-    if ip == nil || ip.IsLoopback() {
-        return nil
-    }
-    ip = ip.To4()
-    if ip == nil {
-        return nil // not an ipv4 address
-    }
-
-    return ip
-}
-func BootTime() string{
-	boottime, _ := host.BootTime()
-    return time.Unix(int64(boottime), 0).Format("2006-01-02 15:04:05")
-}
-func GetGPUName() (string, error) {
-	cmd := exec.Command("/usr/bin/nvidia-smi", "-L")
-	output, err := cmd.Output()
-
-	if err != nil {
-		return "", err
-	}
-
-	r := regexp.MustCompile(`(?m)^GPU \d+: (.*?)\s+\(`) // 修改了这里
-	matches := r.FindAllStringSubmatch(string(output), -1)
-	gpuNames := []string{}
-	for _, match := range matches {
-		gpuNames = append(gpuNames, match[1])
-	}
-
-	return strings.Join(gpuNames, ","), nil
-}
-func GetCPUName() string{
-	var modelname string
-	infos, _ := cpu.Info()
-	for _, sub_cpu := range infos {
-		modelname = sub_cpu.ModelName
-		if modelname!="" {
-			return modelname
-		}
-	}
-	return ""
-}
-func GetMotherboardName() (string, error) {
-	BoardVendor, err := ioutil.ReadFile("/sys/class/dmi/id/board_vendor")
-	if err != nil {
-		return "", err
+		return JsonHardware{}, err
 	}
 	
-	BoardName, err := ioutil.ReadFile("/sys/class/dmi/id/board_name")
+	CPUInfo, err := GetCPUInfo()
 	if err != nil {
-		return "", err
+		return JsonHardware{}, err
 	}
-
-	// 删除尾部的换行符
-	name := strings.TrimSpace(string(BoardVendor)) + " " + strings.TrimSpace(string(BoardName))
-	return name, nil
-}
-func GetDefaultGateway() (string, error) {
-	cmd := exec.Command("bash", "-c", "ip route | grep default | awk '{print $3}' | head -n 1")
-	output, err := cmd.Output()
+	
+	GPUInfo, err := GetGPUInfo()
 	if err != nil {
-		return "", err
+		return JsonHardware{}, err
 	}
-
-	// 删除尾部的换行符
-	gateway := strings.TrimSpace(string(output))
-	return gateway, nil
-}
-func CheckRoute() (int, error) {
-	cmd := exec.Command("ip", "route")
-	output, err := cmd.Output()
-
+	
+	MemoryInfo, err := GetMemoryInfo()
 	if err != nil {
-		return 0, err
+		return JsonHardware{}, err
 	}
-
-	if strings.Contains(string(output), "8.0.0.0") {
-		return 1, nil
-	}
-
-	return 0, nil
-}
-func CheckUFW() (int, error) {
-	cmd := exec.Command("ufw", "status")
-	output, err := cmd.Output()
-
+	
+	PowerSupplyInfo, err := GetPowerSupplyInfo()
 	if err != nil {
-		return 0, err
+		return JsonHardware{}, err
 	}
-
-	outputStr := string(output)
-
-	if strings.Contains(outputStr, "Status: active") && strings.Contains(outputStr, "106.14.32.135") {
-		return 1, nil
+	
+	jsonHardware := JsonHardware{
+		BoardInfo:			BoardInfo,
+		CPUInfo:			CPUInfo,
+		GPUInfo:			GPUInfo,
+		DiskInfo:			DiskInfo,
+		MemoryInfo:			MemoryInfo,
+		PowerSupplyInfo:	PowerSupplyInfo,
 	}
-
-	return 0, nil
+	return jsonHardware, nil
 }
-func RateDisk(dir string) int {
-	info, _ := disk.Usage(dir)
-	return int(math.Floor(float64(info.UsedPercent) + 0.5))
-}
-func GetUsedMemory() (int, error) {
-	vmStat, err := mem.VirtualMemory()
-	if err != nil {
-		return 0, err
-	}
-	totalUsedGB := int(vmStat.Used) / 1024 / 1024 / 1024
-	return totalUsedGB, nil
+// 本地缓存硬件信息
+func GetHardwareInfo2(filePath string, cacheDuration int) (JsonHardware, error) {
+    var hardwareInfo JsonHardware
+
+    fileInfo, err := os.Stat(filePath)
+    if os.IsNotExist(err) {
+        // 文件不存在，获取新的硬件信息
+        newHardwareInfo, err := GetHardwareInfo()
+        if err != nil {
+            return hardwareInfo, err
+        }
+
+        // 将新的硬件信息转换为 JSON 并写入新文件
+        jsonBytes, err := json.Marshal(newHardwareInfo)
+        if err != nil {
+            return hardwareInfo, err
+        }
+
+        err = ioutil.WriteFile(filePath, jsonBytes, 0644)
+        if err != nil {
+            return hardwareInfo, err
+        }
+        return newHardwareInfo, nil
+    } else if err != nil {
+        // 其他错误
+        return hardwareInfo, err
+    }
+
+    // 如果文件存在且最后修改时间超过指定的缓存时间
+    if time.Since(fileInfo.ModTime()) > time.Duration(cacheDuration)*time.Minute {
+        newHardwareInfo, err := GetHardwareInfo()
+        if err != nil {
+            return hardwareInfo, err
+        }
+
+        jsonBytes, err := json.Marshal(newHardwareInfo)
+        if err != nil {
+            return hardwareInfo, err
+        }
+
+        fileContents, err := ioutil.ReadFile(filePath)
+        if err != nil {
+            return hardwareInfo, err
+        }
+
+        if string(fileContents) == string(jsonBytes) {
+            // 内容相同，更新时间戳
+            current := time.Now().Local()
+            os.Chtimes(filePath, current, current)
+        } else {
+            // 内容不同，更新文件
+            err = ioutil.WriteFile(filePath, jsonBytes, 0644)
+            if err != nil {
+                return hardwareInfo, err
+            }
+        }
+        return newHardwareInfo, nil
+    }
+
+    // 文件最后修改时间在指定的缓存时间以内，读取并返回文件内容
+    return JsonHardware{}, nil
 }

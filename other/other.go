@@ -12,8 +12,39 @@ import (
 	"crypto/md5"
 	"path/filepath"
 	"os/exec"
+	"bytes"
 )
-
+/* 单命令执行 */
+func RunCommand(command string, args ...string) (string, string, error) {
+	cmd := exec.Command(command, args...)
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+	if err != nil {
+		return "", "", fmt.Errorf("RunCommand error: %v: %s", err, stderr.String())
+	}
+	return out.String(), stderr.String(), nil
+}
+/* 支持整段多命令一次性执行 */
+func RunCommand2(command string) (string, string, error) {
+	cmd := exec.Command("/bin/bash", "-c", command)
+	var out bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &stderr
+	err := cmd.Run()
+	if err != nil {
+		return "", "", fmt.Errorf("RunCommand2 error: %v: %s", err, stderr.String())
+	}
+	output := out.String()
+	// 检查输出是否为空
+	if len(strings.TrimSpace(output)) == 0 {
+        return "", "", fmt.Errorf("no output from command")
+    }
+	return output, stderr.String(), nil
+}
 func DomainHosts(domain string,IP string) {
 	HOSTS, _ := ReadAll("/etc/hosts")
 	if ok, _ := regexp.MatchString(IP+" "+domain, string(HOSTS)); ok {

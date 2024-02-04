@@ -114,7 +114,4 @@ func main() {
 	// other
 	hostname, _ := other.ReadAll("/etc/hostname")
 	fmt.Println("hostname:", string(hostname))
-	
-	lotus_v, _ := other.GetBinV("/root/sh/.bash/lotus","-v")
-	fmt.Println("lotus_v:", lotus_v)
 }
