@@ -55,7 +55,8 @@ func GetDiskInfo() ([]DiskInfo, error) {
                     cmd = exec.Command("/usr/sbin/smartctl", "-i", disk, "-d", fmt.Sprintf("megaraid,%d", i))
                     out, err = cmd.CombinedOutput()
                     if err != nil {
-                        return nil, fmt.Errorf("smartctl error for %s with megaraid,%d: %v, output: %s", disk, i, err, string(out))
+						continue
+                        // return nil, fmt.Errorf("smartctl error for %s with megaraid,%d: %v, output: %s", disk, i, err, string(out))
                     }
                     info = append(info, parseDiskInfo(blockDevice.Size,out))
                 }

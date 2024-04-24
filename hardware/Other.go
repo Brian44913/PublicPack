@@ -122,22 +122,23 @@ func CheckRoute() (int, error) {
 
 	return 0, nil
 }
-func CheckUFW() (int, error) {
-	cmd := exec.Command("ufw", "status")
-	output, err := cmd.Output()
+func CheckUFW(ip string) (bool, error) {
+    cmd := exec.Command("/usr/sbin/ufw", "status")
+    output, err := cmd.Output()
 
-	if err != nil {
-		return 0, err
-	}
+    if err != nil {
+        return false, err
+    }
 
-	outputStr := string(output)
+    outputStr := string(output)
 
-	if strings.Contains(outputStr, "Status: active") && strings.Contains(outputStr, "106.14.32.135") {
-		return 1, nil
-	}
+    if strings.Contains(outputStr, "Status: active") && strings.Contains(outputStr, ip) {
+        return true, nil
+    }
 
-	return 0, nil
+    return false, nil
 }
+
 func RateDisk(dir string) int {
 	info, _ := disk.Usage(dir)
 	return int(math.Floor(float64(info.UsedPercent) + 0.5))
